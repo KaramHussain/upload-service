@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -18,11 +19,13 @@ import pymongo
 from confluent_kafka import Producer
 import pymongo
 import urllib.request
+import os 
 
+# p = Producer({'bootstrap.servers': 'impact-analysis-kafka-service.impact.analysis:9092'})
+KAFKA_PRODUCER_URL="kafka.carebidsexchange.com:9092"
+p = Producer({'bootstrap.servers': KAFKA_PRODUCER_URL})
 
-
-p = Producer({'bootstrap.servers': 'impact-analysis-kafka-service.impact.analysis:9092'})
-
+# p = Producer({'bootstrap.servers': '127.0.0.1:9092'})
 
 from flask_cors import CORS
 import zipfile
@@ -43,7 +46,12 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 CORS(app)
 
-client = pymongo.MongoClient("mongodb://root:breeze123@impact-analysis-mongodb.impact.analysis:27017")
+# client = pymongo.MongoClient("mongodb://root:breeze123@impact-analysis-mongodb.impact.analysis:27017")
+
+# MONGODB_URL ="mongodb://" + os.environ.get('MONGODB_URL')
+MONGODB_URL ="mongodb+srv://kreniltechup:8h2bpzzklhpfsqj8@cluster0.nlmmxd5.mongodb.net"
+client = pymongo.MongoClient(MONGODB_URL)
+# client = 
 
 db = client["carepays"]
 
@@ -135,11 +143,12 @@ def upload_file():
     print (count)
     try:
         d= {}
-        if type(data['provider_id'])!= int:
-            d['provider_id']= int(data['provider_id'])
-        else:
-             d['provider_id']= data['provider_id']
-            
+        # if type(data['provider_id'])!= int:
+        #     d['provider_id']= int(data['provider_id'])
+        # else:
+        #      d['provider_id']= data['provider_id']
+
+        d['provider_id']=19   
         d['path'] = pt
         
         d['date_upload'] = data['date_upload']
@@ -155,9 +164,9 @@ def upload_file():
         print (data['claim_type'])
         
         if data['claim_type'] == '837':
-            p.produce("client_data2", value=json.dumps(d))
+            p.produce("client_data_837", value=json.dumps(d))
         else:    
-            p.produce("client_data1", value=json.dumps(d))
+            p.produce("client_data_835", value=json.dumps(d))
         p.flush()
 
         
@@ -195,12 +204,3 @@ except Exception as e:
     '''
 if __name__ == "__main__":
     app.run(host= '0.0.0.0', port = 4000)
-
-
-
-
-
-
-
-
-
